@@ -34,7 +34,7 @@
 // ================================ CODE ======================================
 
 #include "sdkconfig.h"
-
+#include <stdint.h>
 #include <esp_log.h>
 #include <esp_system.h>
 #include <nvs_flash.h>
@@ -158,16 +158,21 @@ void app_main(void)
     while (1)
     {
         ESP_LOGI(TAG, "Taking picture...");
-        camera_fb_t *pic = esp_camera_fb_get();
+        camera_fb_t *frame = esp_camera_fb_get();
+        
+        //转成jpg
+        uint8_t *buf = NULL;
+        size_t buf_len = 0;
+        bool converted = frame2bmp(frame, &buf, &buf_len);
+        esp_camera_fb_return(frame);
 
         // use pic->buf to access the image
-        ESP_LOGI(TAG, "Picture taken! Its size was: %zu bytes", pic->len);
+        ESP_LOGI(TAG, "Picture taken! Its size was: %zu bytes", buf_len);
         
         // 上传图片
-        upload_image("http://172.20.10.3:9000/api/v1/service/upload", pic->buf, pic->len);
-        // upload_my_image("http://172.20.10.3:9000/api/v1/service/upload", pic->buf, pic->len);
-        
-        esp_camera_fb_return(pic);
+        upload_image("http://172.20.10.3:9000/api/v1/service/upload2", (const char *)buf, buf_len);
+
+        free(buf);
 
         vTaskDelay(10000 / portTICK_RATE_MS);
     }

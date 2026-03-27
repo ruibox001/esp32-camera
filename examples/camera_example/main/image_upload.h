@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-esp_err_t upload_my_image(const char *url, uint8_t *image_buf, size_t buf_len);
+esp_err_t upload_image(const char *url, uint8_t *img_buf, size_t img_len);
 
 #ifdef __cplusplus
 }
